@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe QuestionsController, type: :controller do
   let(:question) { create(:question) }
-  
+
   describe "GET #index" do
     let(:questions){ create_list(:question, 3) }
     before  {get :index}
@@ -37,6 +37,34 @@ RSpec.describe QuestionsController, type: :controller do
 
     it 'renders new vie' do
       expect(response).to render_template :new
+    end
+  end
+
+  describe 'POST #create' do
+    context 'with valid attributes' do
+      let(:question) { post :create, params: { question: attributes_for(:question) } }
+
+      it 'save a new question in the database' do
+        expect{ question }.to change(Question, :count).by(1)
+      end
+
+      it 'redirect to show view' do
+        question
+        expect(response).to redirect_to assigns(:question)
+      end
+    end
+
+    context 'with invalid attributes' do
+      let(:question) { post :create, params: { question: attributes_for(:question, :invalid) } }
+
+      it 'does not save a new question in the database' do
+        expect{ question }.to_not change(Question, :count)
+      end
+
+      it 're-renders to new view' do
+        question
+        expect(response).to render_template :new
+      end
     end
   end
 
